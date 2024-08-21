@@ -42,6 +42,8 @@ const itemRoutes = require('./controller/itemController');
 app.use('/api', itemRoutes);
 const userRoutes = require('./controller/userController');
 app.use('/api', userRoutes);
+const authenticationRoutes = require('./controller/authenticationController');
+app.use('/api', authenticationRoutes);
 const gsRoutes = require('./controller/generalSetUpController');
 app.use('/api', gsRoutes);
 
