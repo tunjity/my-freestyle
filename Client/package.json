@@ -25,6 +25,9 @@
         "@angular/platform-browser": "^14.2.0",
         "@angular/platform-browser-dynamic": "^14.2.0",
         "@angular/router": "^14.2.0",
+        "@coreui/angular": "^4.8.0",
+        "@coreui/icons": "^2.1.0",
+        "@coreui/icons-angular": "^3.1.1",
         "@ngui/map": "0.30.3",
         "@types/googlemaps": "3.43.3",
         "animate.css": "4.1.1",
@@ -41,7 +44,7 @@
     },
     "devDependencies": {
         "@angular-devkit/build-angular": "^14.2.3",
-        "@angular/cli": "~14.2.3",
+        "@angular/cli": "^15.2.4",
         "@angular/compiler-cli": "^14.2.0",
         "@types/chartist": "0.11.0",
         "@types/jasmine": "~5.1.4",
