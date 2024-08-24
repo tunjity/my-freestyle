@@ -60,18 +60,19 @@ router.get('/users', async (req, res) => {
  */
 router.post('/users', async (req, res) => {
   const { fullname, age,state,country } = req.body;
-  const newItem = new User({ fullname, age,state,country });
+  const createdBy = req.user.id;
+  const newItem = new User({ fullname, age,state,country,createdBy });
   try {
     const savedItem = await newItem.save();
     res.status(201).json({
       status: 'success',
-      message: 'Item created successfully',
       data: savedItem
     });
   } catch (err) {
+    const errorCos = err.errors;
     res.status(500).json({
       status: 'error',
-      message: 'Failed to create User',
+      message: `Failed to create User${errorCos}`,
       data: null
     });
   }
@@ -142,6 +143,7 @@ router.delete('/users/:id', async (req, res) => {
       const user = await User.findById(req.params.id);
       if (user) {
         user.isDeleted = true;
+        user.deletedBy = req.user.id;
         await user.save();
         res.json({
           status: 'success',
@@ -257,6 +259,8 @@ router.get('/users/:id', async (req, res) => {
         user.age = req.body.age || user.age;
         user.state = req.body.state || user.state;
         user.country = req.body.country || user.country;
+        user.createdBy = req.body.createdBy || user.createdBy;
+        user.modifiedBy = req.user.id;
         await user.save();
         res.json({
           status: 'success',

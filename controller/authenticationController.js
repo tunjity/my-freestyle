@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const tM = require('../models/tokenManagement'); // Path to your tokenManagement model
+const tokenManagement = require('../models/tokenManagement'); // Import the model
 
 /**
  * @swagger
  * tags:
- *   name: Authecation
- *   description: Authecation management API
+ *   name: Authentication
+ *   description: Authentication management API
  */
 /**
  * @swagger
  * /api/register:
  *   post:
- *     summary: register a new user
- *     tags: [Authecation]
+ *     summary: Register a new user
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -26,37 +26,48 @@ const tM = require('../models/tokenManagement'); // Path to your tokenManagement
  *                 type: string
  *               password:
  *                 type: string
+ *               username:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Created
  */
 
-
 router.post('/register', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const tokenMan = await tM.findOne({ email });
-
-        if (tokenMan) {
-            return res.status(400).json({ message: 'tokenManagement already exists' });
+        const { email, password,username } = req.body;
+        
+        // Check if a user with this email already exists
+        const existingUser = await tokenManagement.findOne({ $or: [
+            { email: email },
+            { username: username }
+          ]});
+        if (existingUser) {
+            return res.status(400).json({  status: 'error', message: 'User already exists' });
         }
 
-       const newTm = new tokenManagement({ email, password });
+        // Create a new user
+        const newTm = new tokenManagement({ email, password,username });
         await newTm.save();
 
-        const token = jwt.sign({ id: tokenManagement._id }, 'your_jwt_secret', { expiresIn: '1h' });
-
-        res.status(201).json({ status: 'success', token });
+        // Generate JWT token
+        const token = jwt.sign({ id: newTm._id }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.status(200).json({
+            status: 'success',
+            message: 'user added successfully',
+            data: token
+          });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
     }
 });
 
+
 /**
  * @swagger
  * /api/login:
  *   post:
- *     tags: [Authecation]
+ *     tags: [Authentication]
  *     summary: login user
  *     requestBody:
  *       required: true
@@ -77,18 +88,33 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const tokenManagement = await tM.findOne({ email });
+        const existingUser = await tokenManagement.findOne({ email });
 
-        if (!tokenManagement || !(await tokenManagement.comparePassword(password))) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+        if (!existingUser || !(await existingUser.comparePassword(password))) {
+            return  res.status(400).json({
+                status: 'error',
+                message: 'c',
+                data: null
+              });
         }
 
-        const token = jwt.sign({ id: tokenManagement._id }, 'your_jwt_secret', { expiresIn: '1h' });
-
-        res.status(200).json({ status: 'success', token });
-    } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
-    }
+        const token = jwt.sign({ id: existingUser._id }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.json({
+            status: 'success',
+            message: `Welcome ${existingUser.username}`,
+            data: token
+          });
+        } catch (err) {
+          res.status(500).json({
+            status: 'error',
+            message: 'An error occured',
+            data: null
+          });
+        }
+    //     res.status(200).json({ status: 'success', token });
+    // } catch (error) {
+    //     res.status(500).json({ status: 'error', message: error.message });
+    // }
 });
 
 // Protected route example

@@ -19,7 +19,19 @@ const UserSchema = new mongoose.Schema({
   }, isDeleted: {
     type: Boolean,
     default: false
-  }
+  },
+   createdBy: {
+    type: String,
+    required: true,
+  },
+  deletedBy: {
+    type: String,
+    required: false,
+  },
+   modifiedBy: {
+    type: String,
+    required: false,
+  },
 }, {
   timestamps: true
 });
